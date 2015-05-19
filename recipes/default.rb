@@ -2,7 +2,7 @@
 # Cookbook Name:: cog_mysql_backup
 # Recipe:: default
 #
-# Copyright 2015, YOUR_COMPANY_NAME
+# Copyright 2015, Cash On Go
 #
 # All rights reserved - Do Not Redistribute
 #
@@ -12,6 +12,15 @@ include_recipe "percona::package_repo"
 node['cog_mysql_backup']['packages'].each do |pkg|
   package pkg do
     action :install
+  end
+end
+
+[node['cog_mysql_backup']['dest'],node['cog_mysql_backup']['archive']].each do |x|
+  directory x do
+    owner 'root'
+    group 'root'
+    mode '0700'
+    action :create
   end
 end
 
@@ -30,7 +39,7 @@ end
 
 cron_d 'mysql-backup' do
   minute  node['cog_mysql_backup']['minute']
-  hour    node['cog_mysql_backup'][hour]
+  hour    node['cog_mysql_backup']['hour']
   command '/root/myslbackup.sh'
   user    'root'
 end
