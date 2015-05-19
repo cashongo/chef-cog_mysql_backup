@@ -40,6 +40,6 @@ end
 cron_d 'mysql-backup' do
   minute  node['cog_mysql_backup']['minute']
   hour    node['cog_mysql_backup']['hour']
-  command '/root/myslbackup.sh'
+  command '/root/mysqlbackup.sh'
   user    'root'
 end
