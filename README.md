@@ -1,23 +1,21 @@
 cog_mysql_backup Cookbook
 =========================
-TODO: Enter the cookbook description here.
+This cookbook installs /root/myslbackup.sh script, which takes 1 montly full and
+daily incremental backups from mysql with percona xtrabackup tool.
 
-e.g.
-This cookbook makes your favorite breakfast sandwich.
 
 Requirements
 ------------
-TODO: List your cookbook requirements. Be sure to include any requirements this cookbook has on platforms, libraries, other cookbooks, packages, operating systems, etc.
+Percona repo, so it can install percona xtrabackup and qpress.
 
-e.g.
+
 #### packages
-- `toaster` - cog_mysql_backup needs toaster to brown your bagel.
+- `mailx` - mail client for sending raports
+- `qpress` - backup compression/uncompression tool
+- `percona-xtrabackup` - backup tool
 
 Attributes
 ----------
-TODO: List your cookbook attributes here.
-
-e.g.
 #### cog_mysql_backup::default
 <table>
   <tr>
@@ -27,19 +25,41 @@ e.g.
     <th>Default</th>
   </tr>
   <tr>
-    <td><tt>['cog_mysql_backup']['bacon']</tt></td>
-    <td>Boolean</td>
-    <td>whether to include bacon</td>
-    <td><tt>true</tt></td>
+    <td><tt>['cog_mysql_backup']['dest']</tt></td>
+    <td>String</td>
+    <td>Where to store backups</td>
+    <td><tt>/backup</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['archive']</tt></td>
+    <td>String</td>
+    <td>Where to store retired backups</td>
+    <td><tt>/archive</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['email']</tt></td>
+    <td>String</td>
+    <td>Address for reports</td>
+    <td><tt>root@localhost</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['hour']</tt></td>
+    <td>Integer</td>
+    <td>Hour for runnign backup</td>
+    <td><tt>1</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['minute']</tt></td>
+    <td>Integer</td>
+    <td>Minute for running backup</td>
+    <td><tt>0</tt></td>
   </tr>
 </table>
 
 Usage
 -----
 #### cog_mysql_backup::default
-TODO: Write usage instructions for each cookbook.
 
-e.g.
 Just include `cog_mysql_backup` in your node's `run_list`:
 
 ```json
@@ -50,19 +70,3 @@ Just include `cog_mysql_backup` in your node's `run_list`:
   ]
 }
 ```
-
-Contributing
-------------
-TODO: (optional) If this is a public cookbook, detail the process for contributing. If this is a private cookbook, remove this section.
-
-e.g.
-1. Fork the repository on Github
-2. Create a named feature branch (like `add_component_x`)
-3. Write your change
-4. Write tests for your change (if applicable)
-5. Run the tests, ensuring they all pass
-6. Submit a Pull Request using Github
-
-License and Authors
--------------------
-Authors: TODO: List authors
