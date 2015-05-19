@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#deps: mailx, qpress, xtrabackup
+
+BASEPATH=<%= @backupdest %>
+ARCHIVEDIR=<%= @archivedir %>
+MAILTO="<%= @mailto %>"
+
+FDATE=$(date +%Y-%m-FULL)
+LASTMONTH=$(date --date="$(date +%Y-%m-15) -1 month" "+%Y-%m" )
+LASTYEAR=$(date --date="$(date +%Y-%m-15) -1 year" "+%Y" )
+DATE=$(date +%Y-%m-%d)
+HOST=$(hostname -f)
+
+TMPFILE=$(mktemp /tmp/output.XXXXXXXX.txt)
+if [ -e $BASEPATH/$FDATE ]
+then
+	#We have full backup, create incrementals
+	BACKUPTYPE=INCR
+	innobackupex --compress --safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE > $TMPFILE  2>&1
+	RES=$?
+else
+	#IF there is no FULL backup this month, make one
+	BACKUPTYPE=FULL
+	innobackupex --compress --safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE  > $TMPFILE 2>&1
+	RES=$?
+	#move old backups to ARCHIVEDIR
+	mv $BASEPATH/$LASTMONTH* $ARCHIVEDIR
+	mv $BASEPATH/$LASTYEAR* $ARCHIVEDIR
+
+fi
+
+ISOK=0
+
+grep 'innobackupex: completed OK' $TMPFILE  > /dev/null || ISOK=1
+
+if [ "$ISOK" == 0 ] && [ "$RES" == 0 ]
+then
+	SUBJECT="$BACKUPTYPE backup success $HOST $DATE"
+else
+	SUBJECT="$BACKUPTYPE BACKUP FAIL! $HOST $DATE"
+fi
+
+echo "$SUBJECT" | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+
+rm $TMPFILE
