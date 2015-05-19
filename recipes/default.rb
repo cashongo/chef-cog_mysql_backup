@@ -7,6 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
+include_recipe "percona::package_repo"
+
 node['cog_mysql_backup']['packages'].each do |pkg|
   package pkg do
     action :install
@@ -21,7 +23,7 @@ template '/root/mysqlbackup.sh' do
   source 'mysqlbackup.sh.erb'
   variables({
     :backupdest => node['cog_mysql_backup']['dest'],
-    :archivedir => node['cog_mysql_backup']['archive']
+    :archivedir => node['cog_mysql_backup']['archive'],
     :mailto     => node['cog_mysql_backup']['email']
     })
 end
