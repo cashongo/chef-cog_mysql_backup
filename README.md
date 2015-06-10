@@ -1,6 +1,6 @@
 cog_mysql_backup Cookbook
 =========================
-This cookbook installs /root/myslbackup.sh script, which takes 1 montly full and
+This cookbook installs /root/myslbackup.sh script, which takes one monthly full and
 daily incremental backups from mysql with percona xtrabackup tool.
 
 
@@ -10,7 +10,7 @@ Percona repo, so it can install percona xtrabackup and qpress.
 
 
 #### packages
-- `mailx` - mail client for sending raports
+- `mailx` - mail client for sending reports
 - `qpress` - backup compression/uncompression tool
 - `percona-xtrabackup` - backup tool
 
@@ -45,7 +45,7 @@ Attributes
   <tr>
     <td><tt>['cog_mysql_backup']['hour']</tt></td>
     <td>Integer</td>
-    <td>Hour for runnign backup</td>
+    <td>Hour for running backup</td>
     <td><tt>1</tt></td>
   </tr>
   <tr>

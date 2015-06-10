@@ -1,6 +1,3 @@
-cog_mysql_backup CHANGELOG
-==========================
-
 This file is used to list changes made in each version of the cog_mysql_backup cookbook.
 0.1.3
 -----
