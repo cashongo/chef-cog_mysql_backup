@@ -33,7 +33,8 @@ template '/root/mysqlbackup.sh' do
   variables({
     :backupdest => node['cog_mysql_backup']['dest'],
     :archivedir => node['cog_mysql_backup']['archive'],
-    :mailto     => node['cog_mysql_backup']['email']
+    :mailto     => node['cog_mysql_backup']['email'],
+    :mailfrom   => node['cog_mysql_backup']['email_from']
     })
 end
 
