@@ -2,10 +2,10 @@ cog_mysql_backup CHANGELOG
 ==========================
 
 This file is used to list changes made in each version of the cog_mysql_backup cookbook.
-
-0.1.0
+0.1.3
 -----
-- [your_name] - Initial release of cog_mysql_backup
+- Lauri - Move failed full backups after detecting failure to different directory
+- Lauri - Add email_from attribute to set sender address
 
 - - -
 Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.
