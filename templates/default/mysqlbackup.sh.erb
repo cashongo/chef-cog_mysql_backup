@@ -27,7 +27,6 @@ else
 	#move old backups to ARCHIVEDIR
 	mv $BASEPATH/$LASTMONTH* $ARCHIVEDIR
 	mv $BASEPATH/$LASTYEAR* $ARCHIVEDIR
-
 fi
 
 ISOK=0
@@ -39,8 +38,20 @@ then
 	SUBJECT="$BACKUPTYPE backup success $HOST $DATE"
 else
 	SUBJECT="$BACKUPTYPE BACKUP FAIL! $HOST $DATE"
+	if [ $BACKUPTYPE == "FULL" ]
+	then
+		I=1
+		while /usr/bin/test -e ${BASEPATH}/${FDATE}.failed.${I}
+		do
+			I=$(($I+1))
+		done
+		mv $BASEPATH/$FDATE ${BASEPATH}/${FDATE}.failed.${I}
+	fi
 fi
-
+<% if @mailfrom.nil? %>
 echo "$SUBJECT" | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+<% else %>
+echo "$SUBJECT" | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+<% end %>
 
 rm $TMPFILE
