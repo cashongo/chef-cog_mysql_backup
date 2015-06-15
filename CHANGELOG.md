@@ -1,5 +1,9 @@
 This file is used to list changes made in each version of the cog_mysql_backup cookbook.
 
+0.1.5
+-----
+- Lauri - add backup time to content of email.
+
 0.1.4
 -----
 - Lauri - Move failed full backups after detecting failure to different directory
