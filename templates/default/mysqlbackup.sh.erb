@@ -13,16 +13,17 @@ DATE=$(date +%Y-%m-%d)
 HOST=$(hostname -f)
 
 TMPFILE=$(mktemp /tmp/output.XXXXXXXX.txt)
+TIMEFILE=$(mktemp /tmp/timeout.XXXXXXXX.txt)
 if [ -e $BASEPATH/$FDATE ]
 then
 	#We have full backup, create incrementals
 	BACKUPTYPE=INCR
-	innobackupex --compress --safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE > $TMPFILE  2>&1
+	/usr/bin/time -v -o $TIMEFILE innobackupex --compress --safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE > $TMPFILE  2>&1
 	RES=$?
 else
 	#IF there is no FULL backup this month, make one
 	BACKUPTYPE=FULL
-	innobackupex --compress --safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE  > $TMPFILE 2>&1
+	/usr/bin/time -v -o $TIMEFILE innobackupex --compress --safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE  > $TMPFILE 2>&1
 	RES=$?
 	#move old backups to ARCHIVEDIR
 	mv $BASEPATH/$LASTMONTH* $ARCHIVEDIR
@@ -35,9 +36,12 @@ grep 'innobackupex: completed OK' $TMPFILE  > /dev/null || ISOK=1
 
 if [ "$ISOK" == 0 ] && [ "$RES" == 0 ]
 then
+	BTIME=$(awk '/innobackupex: completed OK/ {print $2}' $TMPFILE )
 	SUBJECT="$BACKUPTYPE backup success $HOST $DATE"
+	CONTENT="TIME $BTIME"
 else
 	SUBJECT="$BACKUPTYPE BACKUP FAIL! $HOST $DATE"
+	CONTENT="RESULT $RES"
 	if [ $BACKUPTYPE == "FULL" ]
 	then
 		I=1
@@ -49,9 +53,10 @@ else
 	fi
 fi
 <% if @mailfrom.nil? %>
-echo "$SUBJECT" | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+( echo "$SUBJECT" ; echo ; cat $TIMEFILE ) | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
 <% else %>
-echo "$SUBJECT" | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+( echo "$SUBJECT" ; echo ; cat $TIMEFILE ) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
 <% end %>
 
 rm $TMPFILE
+rm $TIMEFILE
