@@ -1,15 +1,13 @@
-This file is used to list changes made in each version of the cog_mysql_backup cookbook.
+### 0.1.6
 
-0.1.5
------
-- Lauri - add backup time to content of email.
+- Add rsync time also to content of email
+- Reformat Changelog
 
-0.1.4
------
-- Lauri - Move failed full backups after detecting failure to different directory
-- Lauri - Add email_from attribute to set sender address
+### 0.1.5
 
-- - -
-Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.
+- add backup time to content of email.
 
-The [Github Flavored Markdown page](http://github.github.com/github-flavored-markdown/) describes the differences between markdown on github and standard markdown.
+### 0.1.4
+
+- Move failed full backups after detecting failure to different directory
+- Add email_from attribute to set sender address
