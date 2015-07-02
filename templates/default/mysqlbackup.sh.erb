@@ -14,6 +14,7 @@ HOST=$(hostname -f)
 
 TMPFILE=$(mktemp /tmp/output.XXXXXXXX.txt)
 TIMEFILE=$(mktemp /tmp/timeout.XXXXXXXX.txt)
+
 if [ -e $BASEPATH/$FDATE ]
 then
 	#We have full backup, create incrementals
@@ -26,8 +27,8 @@ else
 	/usr/bin/time -v -o $TIMEFILE innobackupex --compress --safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE  > $TMPFILE 2>&1
 	RES=$?
 	#move old backups to ARCHIVEDIR
-	mv $BASEPATH/$LASTMONTH* $ARCHIVEDIR
-	mv $BASEPATH/$LASTYEAR* $ARCHIVEDIR
+	/usr/bin/time -a -v -o $TIMEFILE mv $BASEPATH/$LASTMONTH* $ARCHIVEDIR
+	/usr/bin/time -a -v -o $TIMEFILE mv $BASEPATH/$LASTYEAR* $ARCHIVEDIR
 fi
 
 ISOK=0
