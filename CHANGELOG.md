@@ -1,3 +1,7 @@
+### 0.1.7 (2015-07-30)
+
+- Add possibility to disable backups
+
 ### 0.1.6
 
 - Add rsync time also to content of email

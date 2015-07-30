@@ -12,6 +12,18 @@ LASTYEAR=$(date --date="$(date +%Y-%m-15) -1 year" "+%Y" )
 DATE=$(date +%Y-%m-%d)
 HOST=$(hostname -f)
 
+
+if [ -e /nomysqlbackup ]
+then
+SUBJECT="NO BACKUP $HOST $DATE"
+<% if @mailfrom.nil? %>
+( echo "$SUBJECT" ) | mailx -s "$SUBJECT" -r root@cashongo.co.uk $MAILTO
+<% else %>
+( echo "$SUBJECT" ; echo ; cat $TIMEFILE ) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -r root@cashongo.co.uk $MAILTO
+<% end %>
+	exit 1
+fi
+
 TMPFILE=$(mktemp /tmp/output.XXXXXXXX.txt)
 TIMEFILE=$(mktemp /tmp/timeout.XXXXXXXX.txt)
 
