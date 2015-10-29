@@ -66,9 +66,9 @@ else
 	fi
 fi
 <% if @mailfrom.nil? %>
-( echo "$SUBJECT" ; echo ; cat $TIMEFILE ) | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+( echo "$SUBJECT" ; echo ; echo $CONTENT ; cat $TIMEFILE ) | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
 <% else %>
-( echo "$SUBJECT" ; echo ; cat $TIMEFILE ) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+( echo "$SUBJECT" ; echo ; echo $CONTENT ; cat $TIMEFILE ) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
 <% end %>
 
 rm $TMPFILE
