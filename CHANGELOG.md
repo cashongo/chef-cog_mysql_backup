@@ -1,3 +1,8 @@
+### 0.1.8 (2015-10-29)
+
+- updated script for xtrabackup 2.3
+- a bit more output to email
+
 ### 0.1.7 (2015-07-30)
 
 - Add possibility to disable backups
