@@ -45,11 +45,11 @@ fi
 
 ISOK=0
 
-grep 'innobackupex: completed OK' $TMPFILE  > /dev/null || ISOK=1
+tail -1 $TMPFILE | grep 'completed OK' > /dev/null || ISOK=1
 
 if [ "$ISOK" == 0 ] && [ "$RES" == 0 ]
 then
-	BTIME=$(awk '/innobackupex: completed OK/ {print $2}' $TMPFILE )
+	BTIME=$(awk 'END {print $2}' $TMPFILE )
 	SUBJECT="$BACKUPTYPE backup success $HOST $DATE"
 	CONTENT="TIME $BTIME"
 else
