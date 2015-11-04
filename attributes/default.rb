@@ -7,3 +7,6 @@ default['cog_mysql_backup']['hour'] = 1
 default['cog_mysql_backup']['minute'] = 0
 
 default['cog_mysql_backup']['s3url'] = 's3://cashongo-dev-mysql-archive/'
+
+default['cog_mysql_backup']['aws_credentials_vault']  = 'cog_mysql_backup'
+default['cog_mysql_backup']['aws_credentials_item']   = 'secrets'
