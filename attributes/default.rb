@@ -5,3 +5,5 @@ default['cog_mysql_backup']['email_from'] = nil
 default['cog_mysql_backup']['packages'] = ['qpress','mailx','percona-xtrabackup']
 default['cog_mysql_backup']['hour'] = 1
 default['cog_mysql_backup']['minute'] = 0
+
+default['cog_mysql_backup']['s3url'] = 's3://cashongo-dev-mysql-archive/'
