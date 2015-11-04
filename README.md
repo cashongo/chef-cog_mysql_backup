@@ -6,8 +6,9 @@ daily incremental backups from mysql with percona xtrabackup tool.
 
 Requirements
 ------------
-Percona repo, so it can install percona xtrabackup and qpress.
-
+* Percona repo, so it can install percona xtrabackup and qpress.
+* AWS CLI, this cookbook does not install it itself. Amazon linux comes preloaded
+anyway.
 
 #### packages
 - `mailx` - mail client for sending reports
@@ -35,6 +36,12 @@ Attributes
     <td>String</td>
     <td>Where to store retired backups</td>
     <td><tt>/archive</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['s3url']</tt></td>
+    <td>String</td>
+    <td>S3 URL for backup archiving</td>
+    <td><tt>s3://cashongo-dev-mysql-archive/</tt></td>
   </tr>
   <tr>
     <td><tt>['cog_mysql_backup']['email']</tt></td>
