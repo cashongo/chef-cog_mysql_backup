@@ -4,3 +4,4 @@ metadata
 
 cookbook 'percona'
 cookbook 'cron'
+cookbook 'chef-vault'
