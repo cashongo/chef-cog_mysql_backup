@@ -10,7 +10,7 @@
 include_recipe "percona::package_repo"
 include_recipe "chef-vault"
 
-secrets = chef_vault_item('cog_mysql_backup','secrets')
+secrets = chef_vault_item(node['cog_mysql_backup']['aws_credentials_vault'],node['cog_mysql_backup']['aws_credentials_item'])
 
 node['cog_mysql_backup']['packages'].each do |pkg|
   package pkg do
@@ -34,8 +34,8 @@ template '/root/.aws/credentials' do
   mode '0600'
   source 'awscredentials.erb'
   variables({
-    :access_key => secrets['aws_s3_key'],
-    :secret_key => secrets['aws_s3_secret']
+    :access_key => secrets['aws_key'],
+    :secret_key => secrets['aws_secret']
   })
 end
 
