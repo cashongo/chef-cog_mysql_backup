@@ -1,3 +1,6 @@
+### 0.2.0 (2015-11-04)
+- Move old backups to AWS archive and use AWS server side encryption
+
 ### 0.1.8 (2015-10-29)
 
 - updated script for xtrabackup 2.3
