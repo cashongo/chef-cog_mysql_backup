@@ -38,6 +38,18 @@ Attributes
     <td><tt>/archive</tt></td>
   </tr>
   <tr>
+    <td><tt>['cog_mysql_backup']['aws_credentials_vault']</tt></td>
+    <td>String</td>
+    <td>AWS Credentials vault name</td>
+    <td><tt>cog_mysql_backup</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['aws_credentials_item']</tt></td>
+    <td>String</td>
+    <td>AWS Credentials item name</td>
+    <td><tt>secrets</tt></td>
+  </tr>
+  <tr>
     <td><tt>['cog_mysql_backup']['s3url']</tt></td>
     <td>String</td>
     <td>S3 URL for backup archiving</td>
@@ -67,7 +79,20 @@ Usage
 -----
 #### cog_mysql_backup::default
 
-Just include `cog_mysql_backup` in your node's `run_list`:
+Create a AWS user and create access credentials to specified Chef Vault (by default
+'cog_mysql_backup','secrets' )
+
+This is bucket structure, replace AWSKEY and AWSSECRET with your credentials:
+
+```json
+{
+  "aws_key":"AWSKEY",
+  "aws_secret":"AWSSECRET"
+}
+
+```
+
+Include `cog_mysql_backup` in your node's `run_list`:
 
 ```json
 {
