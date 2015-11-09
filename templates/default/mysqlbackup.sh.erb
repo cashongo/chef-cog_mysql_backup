@@ -7,7 +7,7 @@ ARCHIVEDIR=<%= @archivedir %>
 MAILTO="<%= @mailto %>"
 
 FDATE=$(date +%Y-%m-FULL)
-LASTMONTH=$(date --date="$(date +%Y-%m-15) -1 month" "+%Y-%m" )
+LASTMONTH=$(date --date="$(date +%Y-%m-15) -2 month" "+%Y-%m" )
 LASTYEAR=$(date --date="$(date +%Y-%m-15) -1 year" "+%Y" )
 DATE=$(date +%Y-%m-%d)
 HOST=$(hostname -f)
@@ -25,6 +25,7 @@ SUBJECT="NO BACKUP $HOST $DATE"
 fi
 
 TMPFILE=$(mktemp /tmp/output.XXXXXXXX.txt)
+S3OUTPUT=$(mktemp /tmp/s3.XXXXXXXX.txt)
 TIMEFILE=$(mktemp /tmp/timeout.XXXXXXXX.txt)
 
 if [ -e $BASEPATH/$FDATE ]
@@ -38,18 +39,21 @@ else
 	BACKUPTYPE=FULL
 	/usr/bin/time -v -o $TIMEFILE innobackupex --compress --safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE  > $TMPFILE 2>&1
 	RES=$?
+	#Move stuff to AWS
+
 	#move old backups to ARCHIVEDIR
-	/usr/bin/time -a -v -o $TIMEFILE mv $BASEPATH/$LASTMONTH* $ARCHIVEDIR
-	/usr/bin/time -a -v -o $TIMEFILE mv $BASEPATH/$LASTYEAR* $ARCHIVEDIR
+
+	/usr/bin/time -a -v -o $TIMEFILE mv $BASEPATH/$LASTMONTH-FULL $ARCHIVEDIR && /usr/bin/time -a -v -o $TIMEFILE rm -rf $BASEPATH/$LASTMONTH-*
+	/usr/bin/time -a -v -o $TIMEFILE aws s3 mv $ARCHIVEDIR <%= @s3url %> --recursive --sse > $S3OUTPUT 2>&1
 fi
 
 ISOK=0
 
-grep 'innobackupex: completed OK' $TMPFILE  > /dev/null || ISOK=1
+tail -1 $TMPFILE | grep 'completed OK' > /dev/null || ISOK=1
 
 if [ "$ISOK" == 0 ] && [ "$RES" == 0 ]
 then
-	BTIME=$(awk '/innobackupex: completed OK/ {print $2}' $TMPFILE )
+	BTIME=$(awk 'END {print $2}' $TMPFILE )
 	SUBJECT="$BACKUPTYPE backup success $HOST $DATE"
 	CONTENT="TIME $BTIME"
 else
@@ -66,10 +70,11 @@ else
 	fi
 fi
 <% if @mailfrom.nil? %>
-( echo "$SUBJECT" ; echo ; cat $TIMEFILE ) | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+( echo "$SUBJECT" ; echo ; echo $CONTENT ; cat $TIMEFILE $S3OUTPUT) | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
 <% else %>
-( echo "$SUBJECT" ; echo ; cat $TIMEFILE ) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
+( echo "$SUBJECT" ; echo ; echo $CONTENT ; cat $TIMEFILE $S3OUTPUT) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
 <% end %>
 
 rm $TMPFILE
 rm $TIMEFILE
+rm $S3OUTPUT

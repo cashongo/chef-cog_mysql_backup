@@ -6,8 +6,9 @@ daily incremental backups from mysql with percona xtrabackup tool.
 
 Requirements
 ------------
-Percona repo, so it can install percona xtrabackup and qpress.
-
+* Percona repo, so it can install percona xtrabackup and qpress.
+* AWS CLI, this cookbook does not install it itself. Amazon linux comes preloaded
+anyway.
 
 #### packages
 - `mailx` - mail client for sending reports
@@ -37,6 +38,24 @@ Attributes
     <td><tt>/archive</tt></td>
   </tr>
   <tr>
+    <td><tt>['cog_mysql_backup']['aws_credentials_vault']</tt></td>
+    <td>String</td>
+    <td>AWS Credentials vault name</td>
+    <td><tt>cog_mysql_backup</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['aws_credentials_item']</tt></td>
+    <td>String</td>
+    <td>AWS Credentials item name</td>
+    <td><tt>secrets</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['s3url']</tt></td>
+    <td>String</td>
+    <td>S3 URL for backup archiving</td>
+    <td><tt>s3://cashongo-dev-mysql-archive/</tt></td>
+  </tr>
+  <tr>
     <td><tt>['cog_mysql_backup']['email']</tt></td>
     <td>String</td>
     <td>Address for reports</td>
@@ -60,7 +79,20 @@ Usage
 -----
 #### cog_mysql_backup::default
 
-Just include `cog_mysql_backup` in your node's `run_list`:
+Create a AWS user and create access credentials to specified Chef Vault (by default
+'cog_mysql_backup','secrets' )
+
+This is bucket structure, replace AWSKEY and AWSSECRET with your credentials:
+
+```json
+{
+  "aws_key":"AWSKEY",
+  "aws_secret":"AWSSECRET"
+}
+
+```
+
+Include `cog_mysql_backup` in your node's `run_list`:
 
 ```json
 {
