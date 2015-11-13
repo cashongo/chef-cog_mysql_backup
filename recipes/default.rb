@@ -27,6 +27,16 @@ end
   end
 end
 
+['python-pip','python-devel'].each do |pkg|
+  package pkg do
+    not_if { File.exist?('/usr/bin/aws') }
+  end
+end
+
+python_pip "awscli" do
+  not_if { File.exist?('/usr/bin/aws') }
+end
+
 template '/root/.aws/credentials' do
   action :create
   owner 'root'
