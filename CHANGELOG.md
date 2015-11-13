@@ -1,3 +1,7 @@
+### 0.2.1 (2015-11-13)
+- Install AWS CLI if not installed
+- Install time package with mysql_backup
+
 ### 0.2.0 (2015-11-04)
 - Move old backups to AWS archive and use AWS server side encryption
 - Chef Vault with access keys is now required
