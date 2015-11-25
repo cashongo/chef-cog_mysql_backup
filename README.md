@@ -92,6 +92,8 @@ This is bucket structure, replace AWSKEY and AWSSECRET with your credentials:
 
 ```
 
+Set AWS S3 url to correct location.
+
 Include `cog_mysql_backup` in your node's `run_list`:
 
 ```json
