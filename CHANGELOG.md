@@ -1,3 +1,7 @@
+### 0.2.2 (2015-11-25)
+- Aws s3 upload fix
+- Documentation update
+
 ### 0.2.1 (2015-11-13)
 - Install AWS CLI if not installed
 - Install time package with mysql_backup
