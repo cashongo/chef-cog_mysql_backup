@@ -44,7 +44,11 @@ else
 	#move old backups to ARCHIVEDIR
 
 	/usr/bin/time -a -v -o $TIMEFILE mv $BASEPATH/$LASTMONTH-FULL $ARCHIVEDIR && /usr/bin/time -a -v -o $TIMEFILE rm -rf $BASEPATH/$LASTMONTH-*
-	/usr/bin/time -a -v -o $TIMEFILE aws s3 mv $ARCHIVEDIR <%= @s3url %> --recursive --sse > $S3OUTPUT 2>&1
+	for fullbackupdir in $ARCHIVEDIR/*FULL
+	do
+		ARCHIVENAME=$(basename $fullbackupdir)
+		/usr/bin/time -a -v -o $TIMEFILE aws s3 mv $fullbackupdir <%= @s3url %>/$ARCHIVENAME --recursive --sse >> $S3OUTPUT 2>&1
+	done
 fi
 
 ISOK=0
