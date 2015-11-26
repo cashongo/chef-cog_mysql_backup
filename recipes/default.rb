@@ -43,6 +43,7 @@ template '/root/.aws/credentials' do
   group 'root'
   mode '0600'
   source 'awscredentials.erb'
+  sensitive true
   variables({
     :access_key => secrets['aws_key'],
     :secret_key => secrets['aws_secret']
