@@ -1,3 +1,7 @@
+### 0.2.3 (2015-11-26)
+- Aws credentials are sensitive
+- Remove extra / from AWS s3 URL
+
 ### 0.2.2 (2015-11-25)
 - Aws s3 upload fix
 - Documentation update
