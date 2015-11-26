@@ -47,7 +47,12 @@ else
 	for fullbackupdir in $ARCHIVEDIR/*FULL
 	do
 		ARCHIVENAME=$(basename $fullbackupdir)
-		/usr/bin/time -a -v -o $TIMEFILE aws s3 mv $fullbackupdir <%= @s3url %>/$ARCHIVENAME --recursive --sse >> $S3OUTPUT 2>&1
+		/usr/bin/time -a -v -o $TIMEFILE aws s3 mv $fullbackupdir <%= @s3url %>$ARCHIVENAME --recursive --sse >> $S3OUTPUT 2>&1
+	  FILESLEFT=$(find $fullbackupdir -type f | wc -l)
+		if [ "$FILESLEFT" == 0 ]
+		then
+			rm -rf $fullbackupdir
+		fi
 	done
 fi
 
