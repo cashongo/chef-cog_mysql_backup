@@ -32,12 +32,12 @@ if [ -e $BASEPATH/$FDATE ]
 then
 	#We have full backup, create incrementals
 	BACKUPTYPE=INCR
-	/usr/bin/time -v -o $TIMEFILE innobackupex --compress --safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE > $TMPFILE  2>&1
+	/usr/bin/time -v -o $TIMEFILE innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE > $TMPFILE  2>&1
 	RES=$?
 else
 	#IF there is no FULL backup this month, make one
 	BACKUPTYPE=FULL
-	/usr/bin/time -v -o $TIMEFILE innobackupex --compress --safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE  > $TMPFILE 2>&1
+	/usr/bin/time -v -o $TIMEFILE innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE  > $TMPFILE 2>&1
 	RES=$?
 	#Move stuff to AWS
 

@@ -12,6 +12,8 @@ include_recipe "chef-vault"
 
 secrets = chef_vault_item(node['cog_mysql_backup']['aws_credentials_vault'],node['cog_mysql_backup']['aws_credentials_item'])
 
+limit_databases = node['cog_mysql_backup'].has_key?('backup_databases') && node['cog_mysql_backup']['backup_databases'].kind_of?(Array) && node['cog_mysql_backup']['backup_databases'].count>0
+
 node['cog_mysql_backup']['packages'].each do |pkg|
   package pkg do
     action :install
@@ -61,7 +63,9 @@ template '/root/mysqlbackup.sh' do
     :archivedir => node['cog_mysql_backup']['archive'],
     :mailto     => node['cog_mysql_backup']['email'],
     :mailfrom   => node['cog_mysql_backup']['email_from'],
-    :s3url      => node['cog_mysql_backup']['s3url']
+    :s3url      => node['cog_mysql_backup']['s3url'],
+    :databases  => ( limit_databases ? node['cog_mysql_backup']['backup_databases'].join(',') : nil),
+    :limit_databases => limit_databases
     })
 end
 
