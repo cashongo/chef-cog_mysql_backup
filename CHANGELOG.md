@@ -1,3 +1,6 @@
+### 0.3.0 (2015-12-21)
+- option to limit backup by databases
+
 ### 0.2.3 (2015-11-26)
 - Aws credentials are sensitive
 - Remove extra / from AWS s3 URL
