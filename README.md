@@ -73,6 +73,12 @@ Attributes
     <td>Minute for running backup</td>
     <td><tt>0</tt></td>
   </tr>
+  <tr>
+    <td><tt>['cog_mysql_backup']['backup_databases']</tt></td>
+    <td>Array of Strings</td>
+    <td>Databases to be backed up. If empty, all are backed up</td>
+    <td><tt>nil</tt></td>
+  </tr>
 </table>
 
 Usage
