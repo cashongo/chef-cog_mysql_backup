@@ -64,7 +64,7 @@ template '/root/mysqlbackup.sh' do
     :mailto     => node['cog_mysql_backup']['email'],
     :mailfrom   => node['cog_mysql_backup']['email_from'],
     :s3url      => node['cog_mysql_backup']['s3url'],
-    :databases  => ( limit_databases ? node['cog_mysql_backup']['backup_databases'].join(',') : nil),
+    :databases  => ( limit_databases ? node['cog_mysql_backup']['backup_databases'].join(' ') : nil),
     :limit_databases => limit_databases
     })
 end
