@@ -1,3 +1,6 @@
+### 0.3.1 (2015-12-23)
+- fix limited databases separator
+
 ### 0.3.0 (2015-12-21)
 - option to limit backup by databases
 
