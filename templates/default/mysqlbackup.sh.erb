@@ -43,7 +43,7 @@ else
 
 	#move old backups to ARCHIVEDIR
 
-	/usr/bin/time -a -v -o $TIMEFILE mv $BASEPATH/$LASTMONTH-FULL $ARCHIVEDIR && /usr/bin/time -a -v -o $TIMEFILE rm -rf $BASEPATH/$LASTMONTH-*
+	/usr/bin/time -a -v -o $TIMEFILE mv "$BASEPATH/$LASTMONTH-FULL" "$ARCHIVEDIR" && /usr/bin/time -a -v -o $TIMEFILE rm -rf "$BASEPATH/$LASTMONTH-"*
 	for fullbackupdir in $ARCHIVEDIR/*FULL
 	do
 		ARCHIVENAME=$(basename $fullbackupdir)
@@ -51,7 +51,7 @@ else
 	  FILESLEFT=$(find $fullbackupdir -type f | wc -l)
 		if [ "$FILESLEFT" == 0 ]
 		then
-			rm -rf $fullbackupdir
+			rm -rf "$fullbackupdir"
 		fi
 	done
 fi
@@ -84,6 +84,6 @@ fi
 ( echo "$SUBJECT" ; echo ; echo $CONTENT ; cat $TIMEFILE $S3OUTPUT) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
 <% end %>
 
-rm $TMPFILE
-rm $TIMEFILE
-rm $S3OUTPUT
+rm "$TMPFILE"
+rm "$TIMEFILE"
+rm "$S3OUTPUT"
