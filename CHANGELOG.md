@@ -1,3 +1,6 @@
+### 0.4.0 (2016-02-08)
+- Send logs to syslog instead of e-mailing them
+
 ### 0.3.2 (2015-12-30)
 - add some quoting to backup script
 
