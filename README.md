@@ -56,12 +56,6 @@ Attributes
     <td><tt>s3://cashongo-dev-mysql-archive/</tt></td>
   </tr>
   <tr>
-    <td><tt>['cog_mysql_backup']['email']</tt></td>
-    <td>String</td>
-    <td>Address for reports</td>
-    <td><tt>root@localhost</tt></td>
-  </tr>
-  <tr>
     <td><tt>['cog_mysql_backup']['hour']</tt></td>
     <td>Integer</td>
     <td>Hour for running backup</td>
