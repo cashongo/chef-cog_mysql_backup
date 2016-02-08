@@ -4,54 +4,59 @@
 
 BASEPATH=<%= @backupdest %>
 ARCHIVEDIR=<%= @archivedir %>
-MAILTO="<%= @mailto %>"
 
 FDATE=$(date +%Y-%m-FULL)
 LASTMONTH=$(date --date="$(date +%Y-%m-15) -2 month" "+%Y-%m" )
 LASTYEAR=$(date --date="$(date +%Y-%m-15) -1 year" "+%Y" )
 DATE=$(date +%Y-%m-%d)
-HOST=$(hostname -f)
 
+LOGGER="/usr/bin/logger -t mysqlbackup -p local0.notice"
 
 if [ -e /nomysqlbackup ]
 then
-SUBJECT="NO BACKUP $HOST $DATE"
-<% if @mailfrom.nil? %>
-( echo "$SUBJECT" ) | mailx -s "$SUBJECT" -r root@cashongo.co.uk $MAILTO
-<% else %>
-( echo "$SUBJECT" ; echo ; cat $TIMEFILE ) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -r root@cashongo.co.uk $MAILTO
-<% end %>
+	echo "NO MYSQL Backup from <%= @hostname %>" | $LOGGER
 	exit 1
 fi
 
 TMPFILE=$(mktemp /tmp/output.XXXXXXXX.txt)
-S3OUTPUT=$(mktemp /tmp/s3.XXXXXXXX.txt)
-TIMEFILE=$(mktemp /tmp/timeout.XXXXXXXX.txt)
 
 if [ -e $BASEPATH/$FDATE ]
 then
 	#We have full backup, create incrementals
 	BACKUPTYPE=INCR
-	/usr/bin/time -v -o $TIMEFILE innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE > $TMPFILE  2>&1
+	echo Doing Incremental backup on <%= @hostname %> at "$DATE" | $LOGGER
+	innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE 2>&1 | tee $TMPFILE | $LOGGER
 	RES=$?
 else
 	#IF there is no FULL backup this month, make one
 	BACKUPTYPE=FULL
-	/usr/bin/time -v -o $TIMEFILE innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE  > $TMPFILE 2>&1
+	echo Doing Full backup on <%= @hostname %> at "$DATE" | $LOGGER
+	innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE 2>&1 | tee $TMPFILE | $LOGGER
 	RES=$?
 	#Move stuff to AWS
 
 	#move old backups to ARCHIVEDIR
 
-	/usr/bin/time -a -v -o $TIMEFILE mv "$BASEPATH/$LASTMONTH-FULL" "$ARCHIVEDIR" && /usr/bin/time -a -v -o $TIMEFILE rm -rf "$BASEPATH/$LASTMONTH-"*
+	echo Moving old backup "$BASEPATH/$LASTMONTH-FULL"  to archive "$ARCHIVEDIR", cleaning up "$BASEPATH/$LASTMONTH-"*  | $LOGGER
+	mv "$BASEPATH/$LASTMONTH-FULL" "$ARCHIVEDIR" && rm -rf "$BASEPATH/$LASTMONTH-"*
 	for fullbackupdir in $ARCHIVEDIR/*FULL
 	do
 		ARCHIVENAME=$(basename $fullbackupdir)
-		/usr/bin/time -a -v -o $TIMEFILE aws s3 mv $fullbackupdir <%= @s3url %>$ARCHIVENAME --recursive --sse >> $S3OUTPUT 2>&1
-	  FILESLEFT=$(find $fullbackupdir -type f | wc -l)
+		echo Archiving "$fullbackupdir" to S3 "<%= @s3url %>$ARCHIVENAME" | $LOGGER 2>&1
+		aws s3 mv "$fullbackupdir" "<%= @s3url %>$ARCHIVENAME" --recursive --sse --quiet 2>&1 | $LOGGER
+
+		S3RESULT=${PIPESTATUS[0]}
+
+		if [ "${S3RESULT}" != "0" ]
+		then
+			echo S3 failure | $LOGGER
+		fi
+
+	  FILESLEFT=$(find $fullbackupdir -type f | wc -l 2>&1)
 		if [ "$FILESLEFT" == 0 ]
 		then
-			rm -rf "$fullbackupdir"
+			echo Cleaning up "$fullbackupdir" | $LOGGER
+			rm -rf "$fullbackupdir" 2>&1 | $LOGGER
 		fi
 	done
 fi
@@ -62,11 +67,10 @@ tail -1 $TMPFILE | grep 'completed OK' > /dev/null || ISOK=1
 
 if [ "$ISOK" == 0 ] && [ "$RES" == 0 ]
 then
-	BTIME=$(awk 'END {print $2}' $TMPFILE )
-	SUBJECT="$BACKUPTYPE backup success $HOST $DATE"
-	CONTENT="TIME $BTIME"
+		echo "$BACKUPTYPE backup success <%= @hostname %> $DATE" | $LOGGER
+
 else
-	SUBJECT="$BACKUPTYPE BACKUP FAIL! $HOST $DATE"
+  	echo "$BACKUPTYPE BACKUP FAIL! <%= @hostname %> $DATE" | $LOGGER
 	CONTENT="RESULT $RES"
 	if [ $BACKUPTYPE == "FULL" ]
 	then
@@ -75,15 +79,9 @@ else
 		do
 			I=$(($I+1))
 		done
+		echo "Moving failed backup $BASEPATH/$FDATE to ${BASEPATH}/${FDATE}.failed.${I} at <%= @hostname %>" | $LOGGER
 		mv $BASEPATH/$FDATE ${BASEPATH}/${FDATE}.failed.${I}
 	fi
 fi
-<% if @mailfrom.nil? %>
-( echo "$SUBJECT" ; echo ; echo $CONTENT ; cat $TIMEFILE $S3OUTPUT) | mailx -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
-<% else %>
-( echo "$SUBJECT" ; echo ; echo $CONTENT ; cat $TIMEFILE $S3OUTPUT) | mailx -S "from=<%= @mailfrom %>" -s "$SUBJECT" -a $TMPFILE -r root@cashongo.co.uk $MAILTO
-<% end %>
 
 rm "$TMPFILE"
-rm "$TIMEFILE"
-rm "$S3OUTPUT"
