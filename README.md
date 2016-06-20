@@ -56,6 +56,12 @@ Attributes
     <td><tt>s3://cashongo-dev-mysql-archive/</tt></td>
   </tr>
   <tr>
+    <td><tt>['cog_mysql_backup']['s3url_incr']</tt></td>
+    <td>String</td>
+    <td>S3 URL for incremental backups</td>
+    <td><tt>s3://cashongo-dev-mysql-backup/</tt></td>
+  </tr>
+  <tr>
     <td><tt>['cog_mysql_backup']['hour']</tt></td>
     <td>Integer</td>
     <td>Hour for running backup</td>
