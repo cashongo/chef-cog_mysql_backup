@@ -58,14 +58,15 @@ template '/root/mysqlbackup.sh' do
   owner 'root'
   group 'root'
   source 'mysqlbackup.sh.erb'
-  variables({
-    :backupdest => node['cog_mysql_backup']['dest'],
-    :archivedir => node['cog_mysql_backup']['archive'],
-    :hostname   => node['fqdn'],
-    :s3url      => node['cog_mysql_backup']['s3url'],
-    :databases  => ( limit_databases ? node['cog_mysql_backup']['backup_databases'].join(' ') : nil),
-    :limit_databases => limit_databases
-    })
+  variables(
+    backupdest: node['cog_mysql_backup']['dest'],
+    archivedir: node['cog_mysql_backup']['archive'],
+    hostname: node['fqdn'],
+    s3url: node['cog_mysql_backup']['s3url'],
+    s3url_incr: node['cog_mysql_backup']['s3url_incr'],
+    databases: ( limit_databases ? node['cog_mysql_backup']['backup_databases'].join(' ') : nil),
+    limit_databases: limit_databases
+    )
 end
 
 cron_d 'mysql-backup' do
