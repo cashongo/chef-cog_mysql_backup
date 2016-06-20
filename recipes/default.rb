@@ -7,8 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
-include_recipe "percona::package_repo"
-include_recipe "chef-vault"
+include_recipe 'percona::package_repo'
+include_recipe 'chef-vault'
 
 secrets = chef_vault_item(node['cog_mysql_backup']['aws_credentials_vault'],node['cog_mysql_backup']['aws_credentials_item'])
 
@@ -29,13 +29,13 @@ end
   end
 end
 
-['python-pip','python-devel'].each do |pkg|
+%w(python-pip python-devel).each do |pkg|
   package pkg do
     not_if { File.exist?('/usr/bin/aws') }
   end
 end
 
-python_pip "awscli" do
+python_pip 'awscli' do
   not_if { File.exist?('/usr/bin/aws') }
 end
 
@@ -46,10 +46,10 @@ template '/root/.aws/credentials' do
   mode '0600'
   source 'awscredentials.erb'
   sensitive true
-  variables({
-    :access_key => secrets['aws_key'],
-    :secret_key => secrets['aws_secret']
-  })
+  variables(
+    access_key: secrets['aws_key'],
+    secret_key: secrets['aws_secret']
+  )
 end
 
 template '/root/mysqlbackup.sh' do
