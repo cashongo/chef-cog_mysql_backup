@@ -14,51 +14,39 @@ LOGGER="/usr/bin/logger -t mysqlbackup -p local0.notice"
 
 if [ -e /nomysqlbackup ]
 then
-	echo "NO MYSQL Backup from <%= @hostname %>" | $LOGGER
-	exit 1
+  echo "NO MYSQL Backup from <%= @hostname %>" | $LOGGER
+  exit 1
 fi
 
 TMPFILE=$(mktemp /tmp/output.XXXXXXXX.txt)
 
 if [ -e $BASEPATH/$FDATE ]
 then
-	#We have full backup, create incrementals
-	BACKUPTYPE=INCR
-	echo Doing Incremental backup on <%= @hostname %> at "$DATE" | $LOGGER
-	innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE 2>&1 | tee $TMPFILE | $LOGGER
-	RES=$?
+  #We have full backup, create incrementals
+  BACKUPTYPE=INCR
+  echo Doing Incremental backup on <%= @hostname %> at "$DATE" | $LOGGER
+  innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --incremental $BASEPATH --incremental-basedir=$BASEPATH/$FDATE 2>&1 | tee $TMPFILE | $LOGGER
+  RES=$?
+  echo Copying backup $DATE to S3 "<%= @s3url_incr %>" | $LOGGER 2>&1
+  latestdir=$(find $BASEPATH -maxdepth 1 -type d -name "$DATE*" | tail -1)
+  backupdir=$(basename $latestdir)
+  aws s3 cp $BASEPATH/$backupdir <%= @s3url_incr %>$backupdir --sse --recursive --quiet |  $LOGGER
+  S3RESULT=${PIPESTATUS[0]}
 else
-	#IF there is no FULL backup this month, make one
-	BACKUPTYPE=FULL
-	echo Doing Full backup on <%= @hostname %> at "$DATE" | $LOGGER
-	innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE 2>&1 | tee $TMPFILE | $LOGGER
-	RES=$?
-	#Move stuff to AWS
+  #IF there is no FULL backup this month, make one
+  BACKUPTYPE=FULL
+  echo Doing Full backup on <%= @hostname %> at "$DATE" | $LOGGER
+  innobackupex --compress <%= (@limit_databases ? "--databases=\"#{@databases}\" ":"") %>--safe-slave-backup --rsync --no-timestamp $BASEPATH/$FDATE 2>&1 | tee $TMPFILE | $LOGGER
+  RES=$?
+  echo Archiving backup $FDATE to S3 "<%= @s3url %>" | $LOGGER 2>&1
+  aws s3 cp $BASEPATH/$FDATE <%= @s3url %>$FDATE --sse --recursive --quiet 2>&1 | $LOGGER
+  S3RESULT=${PIPESTATUS[0]}
+  echo Cleaning up "$BASEPATH/$LASTMONTH-"*  | $LOGGER
+fi
 
-	#move old backups to ARCHIVEDIR
-
-	echo Moving old backup "$BASEPATH/$LASTMONTH-FULL"  to archive "$ARCHIVEDIR", cleaning up "$BASEPATH/$LASTMONTH-"*  | $LOGGER
-	mv "$BASEPATH/$LASTMONTH-FULL" "$ARCHIVEDIR" && rm -rf "$BASEPATH/$LASTMONTH-"*
-	for fullbackupdir in $ARCHIVEDIR/*FULL
-	do
-		ARCHIVENAME=$(basename $fullbackupdir)
-		echo Archiving "$fullbackupdir" to S3 "<%= @s3url %>$ARCHIVENAME" | $LOGGER 2>&1
-		aws s3 mv "$fullbackupdir" "<%= @s3url %>$ARCHIVENAME" --recursive --sse --quiet 2>&1 | $LOGGER
-
-		S3RESULT=${PIPESTATUS[0]}
-
-		if [ "${S3RESULT}" != "0" ]
-		then
-			echo S3 failure | $LOGGER
-		fi
-
-	  FILESLEFT=$(find $fullbackupdir -type f | wc -l 2>&1)
-		if [ "$FILESLEFT" == 0 ]
-		then
-			echo Cleaning up "$fullbackupdir" | $LOGGER
-			rm -rf "$fullbackupdir" 2>&1 | $LOGGER
-		fi
-	done
+if [ "${S3RESULT}" != "0" ]
+then
+  echo S3 failure | $LOGGER
 fi
 
 ISOK=0
@@ -67,21 +55,20 @@ tail -1 $TMPFILE | grep 'completed OK' > /dev/null || ISOK=1
 
 if [ "$ISOK" == 0 ] && [ "$RES" == 0 ]
 then
-		echo "$BACKUPTYPE backup success <%= @hostname %> $DATE" | $LOGGER
-
+  echo "$BACKUPTYPE backup success <%= @hostname %> $DATE" | $LOGGER
 else
-  	echo "$BACKUPTYPE BACKUP FAIL! <%= @hostname %> $DATE" | $LOGGER
-	CONTENT="RESULT $RES"
-	if [ $BACKUPTYPE == "FULL" ]
-	then
-		I=1
-		while /usr/bin/test -e ${BASEPATH}/${FDATE}.failed.${I}
-		do
-			I=$(($I+1))
-		done
-		echo "Moving failed backup $BASEPATH/$FDATE to ${BASEPATH}/${FDATE}.failed.${I} at <%= @hostname %>" | $LOGGER
-		mv $BASEPATH/$FDATE ${BASEPATH}/${FDATE}.failed.${I}
-	fi
+  echo "$BACKUPTYPE BACKUP FAIL! <%= @hostname %> $DATE" | $LOGGER
+  CONTENT="RESULT $RES"
+  if [ $BACKUPTYPE == "FULL" ]
+  then
+    I=1
+    while /usr/bin/test -e ${BASEPATH}/${FDATE}.failed.${I}
+    do
+      I=$(($I+1))
+    done
+    echo "Moving failed backup $BASEPATH/$FDATE to ${BASEPATH}/${FDATE}.failed.${I} at <%= @hostname %>" | $LOGGER
+    mv $BASEPATH/$FDATE ${BASEPATH}/${FDATE}.failed.${I}
+  fi
 fi
 
 rm "$TMPFILE"
