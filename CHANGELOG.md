@@ -1,3 +1,6 @@
+### 0.5.0 (2016-06-17)
+- Copy backups instantly to S3
+
 ### 0.4.0 (2016-02-08)
 - Send logs to syslog instead of e-mailing them
 
