@@ -1,3 +1,6 @@
+### 0.6.0 (2016-08-17)
+- New old backup cleanup logic
+
 ### 0.5.0 (2016-06-17)
 - Copy backups instantly to S3
 
