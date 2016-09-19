@@ -1,3 +1,6 @@
+### 0.6.1 (2016-09-19)
+- Reduce time to keep MySQL backups on disk from 3 to 2 cycles
+
 ### 0.6.0 (2016-08-17)
 - New old backup cleanup logic
 
